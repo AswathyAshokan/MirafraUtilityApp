@@ -55,6 +55,7 @@ func (event EventModel)InsertEvent()bool{
 	collection := sess.DB("mirafrautilityapp").C("eventCounter")
 	err =collection.Find(nil).One(eventFind)
 	fmt.Println("hhhhhh",eventFind.EventId)
+
 	if len(eventFind.EventId) ==0{
 		eventCounter.Count="0"
 		eventCounter.EventId ="EventId"
@@ -66,6 +67,7 @@ func (event EventModel)InsertEvent()bool{
 		}
 	}
 
+	fmt.Println("condition1")
 
 	//updating the sequence
 	err =collection.Find(nil).One(eventCounter)
