@@ -69,6 +69,8 @@ func (event EventModel)InsertEvent()bool{
 
 	fmt.Println("condition1")
 	fmt.Println("condition2")
+	fmt.Println("condition3")
+
 
 
 	//updating the sequence
