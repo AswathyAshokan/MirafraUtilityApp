@@ -68,6 +68,8 @@ func (event EventModel)InsertEvent()bool{
 	}
 
 	fmt.Println("condition1")
+	fmt.Println("condition2")
+
 
 	//updating the sequence
 	err =collection.Find(nil).One(eventCounter)
