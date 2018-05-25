@@ -42,6 +42,7 @@ func (event EventModel)InsertEvent()bool{
 	sess, err := mgo.Dial(uri)
 	if err != nil {
 		fmt.Printf("Can't connect to mongo, go error %v\n", err)
+		fmt.Println("something happend")
 		os.Exit(1)
 	}
 	defer sess.Close()
@@ -88,7 +89,7 @@ func (event EventModel)InsertEvent()bool{
 		log.Fatal("Problem inserting data: ", err)
 		return false
 	}
-	fmt.Println("haiiii")
+	//fmt.Println("haiiii")
 
 	return true
 }
