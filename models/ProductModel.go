@@ -39,6 +39,7 @@ func(product Product)InsertProductDetails()bool{
 		os.Exit(1)
 	}
 	defer sess.Close()
+	fmt.Println("kkkkkk")
 	fmt.Println("klinhggggggdgg")
 	//productCounter :=ProductCounter{}
 	//productCounter.ProductId ="ProductId"

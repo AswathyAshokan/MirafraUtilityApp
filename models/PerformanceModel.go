@@ -46,6 +46,7 @@ func GetPerformance()(bool,[]PerformanceModel){
 		fmt.Println("no connection string provided")
 		os.Exit(1)
 	}
+	fmt.Println("kkkkkk")
 
 	sess, err := mgo.Dial(uri)
 	if err != nil {

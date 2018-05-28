@@ -66,6 +66,7 @@ func DisplayJobReferDetails()(bool,[]JobRefer){
 	}
 	fmt.Println("some place ")
 	fmt.Println("some place ")
+	fmt.Println("kkkkkk")
 
 	fmt.Println("jobrefer details struct",JobRefer)
 	return true,JobRefer

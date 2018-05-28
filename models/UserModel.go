@@ -104,6 +104,7 @@ func GetNewJoiners() (bool,[]User){
 	currentTime := time.Now()
 	todayDate :=currentTime.Format("02/01/2006")
 	var NewJoiners []User
+	fmt.Println("kkkkkk")
 	uri := os.Getenv("MONGOLAB_URL")
 	if uri == "" {
 		fmt.Println("no connection string provided")

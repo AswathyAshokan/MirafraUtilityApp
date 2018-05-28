@@ -71,6 +71,7 @@ func(loginDetails *Login)CheckLogin( )(bool,string){
 		fmt.Println("something happend")
 		os.Exit(1)
 	}
+	fmt.Println("kkkkkk")
 	defer sess.Close()
 	collection := sess.DB("mirafrautilityapp").C("user")
 	//err = collection.Find(bson.M{"DateOfJoin": todayDate}).All(&NewJoiners)
