@@ -1,7 +1,7 @@
 package controllers
 
 import (
-	"MirafraUtilityApp/models"
+	"github.com/AswathyAshokan/MirafraUtilityApp/models"
 	"fmt"
 )
 

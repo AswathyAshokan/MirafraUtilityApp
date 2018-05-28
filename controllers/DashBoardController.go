@@ -3,7 +3,7 @@ package controllers
 import (
 	"time"
 	"fmt"
-	"MirafraUtilityApp/models"
+	"github.com/AswathyAshokan/MirafraUtilityApp/models"
 	"strings"
 )
 
