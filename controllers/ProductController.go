@@ -6,7 +6,6 @@ import (
 	"time"
 	"os"
 	"log"
-	"net/http"
 	"fmt"
 	"io"
 )
@@ -15,51 +14,58 @@ type ProductController struct {
 	BaseController
 }
 
-func (c *ProductController) InserProductDetails(){
+func (c *ProductController) InserProductDetails()bool{
 	product :=models.Product{}
 	r := c.Ctx.Request
 	w := c.Ctx.ResponseWriter
-	product.ProductName =c.GetString("ProductName")
-	product.ContactNo =c.GetString("ContactNo")
-	product.Description =c.GetString("Description")
-	product.Price =c.GetString("Price")
-	product.ProductStatus=false
-	//photoUploading
+	if r.Method == "POST" {
+		product.ProductName = c.GetString("ProductName")
+		product.ContactNo = c.GetString("ContactNo")
+		product.Description = c.GetString("Description")
+		product.Price = c.GetString("Price")
+		product.ProductComment =c.GetString("ProductComment")
+		product.ProductStatus = false
+		//photoUploading
 
-	msec := strconv.FormatInt(time.Now().UnixNano() / 1000000,10)
-	//creating a folder for uploading
-	if _, err := os.Stat("./testUploadImage/"); os.IsNotExist(err) {
+		msec := strconv.FormatInt(time.Now().UnixNano()/1000000, 10)
+		//creating a folder for uploading
+		if _, err := os.Stat("./testUploadImage/"); os.IsNotExist(err) {
 
-		os.Mkdir("./testUploadImage/",os.ModePerm)
+			os.Mkdir("./testUploadImage/", os.ModePerm)
+		}
+		file, header, err := r.FormFile("uploadfile")
+		if err != nil {
+			log.Println("uploading error", err)
+			//http.Error(w, "error in uploading file", http.StatusInternalServerError)
+
+		} else {
+			f, err := os.OpenFile("./testUploadImage/"+msec+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+			if err != nil {
+				fmt.Println("image 4 error", err)
+
+			}
+			fmt.Println("jst")
+			imagePath := "./testUploadImage" + msec + header.Filename
+
+			io.Copy(f, file)
+			defer file.Close()
+			product.Photo = imagePath
+			fmt.Fprintf(w, "file  uploaded")
+
+		}
+
+		dbStatus := product.InsertProductDetails()
+		switch dbStatus {
+		case true:
+			return true
+			fmt.Println("insert product")
+		case false:
+			fmt.Println("error in insertion")
+		   return false
+		}
+		return true
 	}
-	file,header,err :=r.FormFile("uploadfile")
-	if err !=nil{
-		log.Println("uploading error",err)
-		http.Error(w,"error in uploading file",http.StatusInternalServerError)
-		return
-	}
-	f, err := os.OpenFile("./testUploadImage/"+msec+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		fmt.Println("image 4 error",err)
-		return
-	}
-	fmt.Println("jst")
-	imagePath :="./testUploadImage"+msec+header.Filename
-
-	io.Copy(f, file)
-	defer file.Close()
-	product.Photo	=imagePath
-	fmt.Fprintf(w,"file  uploaded")
-
-	dbStatus :=product.InsertProductDetails()
-	switch dbStatus {
-	case true:
-		fmt.Println("insert product")
-	case false:
-		fmt.Println("error in insertion")
-	}
-
-
+return true
 }
 
 func( c *ProductController) DisplayProductDetails()[][]string{

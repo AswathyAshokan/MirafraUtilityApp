@@ -8,6 +8,7 @@ import (
 
 	"golang.org/x/crypto/bcrypt"
 	"log"
+	"os"
 )
 
 
@@ -58,29 +59,32 @@ func(loginDetails *Login)CheckLogin( )(bool,string){
 	//loginDetails.Password =password
 
 	Result :=User{}
-	Host := []string{
-		"127.0.0.1:27017",
-
+	uri := os.Getenv("MONGOLAB_URL")
+	if uri == "" {
+		fmt.Println("no connection string provided")
+		os.Exit(1)
 	}
-	session, err := mgo.DialWithInfo(&mgo.DialInfo{
-		Addrs: Host,
 
-	})
+	sess, err := mgo.Dial(uri)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Can't connect to mongo, go error %v\n", err)
+		fmt.Println("something happend")
+		os.Exit(1)
 	}
-	defer session.Close()
-
-	dbConnect := session.DB("MirafraUtility").C("user")
-	fmt.Println("connection",dbConnect)
-	err = dbConnect.Find(bson.M{"Email": loginDetails.Email}).One(&Result)
+	defer sess.Close()
+	collection := sess.DB("mirafrautilityapp").C("user")
+	//err = collection.Find(bson.M{"DateOfJoin": todayDate}).All(&NewJoiners)
+	//collection := sess.DB("mirafrautilityapp").C("user")
+	fmt.Println("connection",collection)
+	fmt.Println("kkkkk",loginDetails.Email)
+	err = collection.Find(bson.M{"email": loginDetails.Email}).One(&Result)
 	if err !=nil{
-		log.Println(err)
+		log.Println("mmmmmm",err)
 		return false,Result.PositionType
 
 	}
 	err = bcrypt.CompareHashAndPassword(Result.Password, loginDetails.Password)
-
+    fmt.Println("result",Result.PositionType)
 	if err != nil {
 		fmt.Println("connection error ",err)
 		return  false,Result.PositionType

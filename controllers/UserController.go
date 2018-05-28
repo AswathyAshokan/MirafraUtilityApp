@@ -17,7 +17,7 @@ type UserControllers struct {
 
 func (c *UserControllers)UserInsert() bool{
 	r := c.Ctx.Request
-	w := c.Ctx.ResponseWriter
+	//w := c.Ctx.ResponseWriter
 	user :=models.User{}
 	if r.Method == "POST" {
 		user.PositionType = c.GetString("PositionType")
@@ -40,6 +40,8 @@ func (c *UserControllers)UserInsert() bool{
 		user.Gender = c.GetString("Gender")
 		user.JobStatus = c.GetString("JobStatus")
 
+		fmt.Println("ggggggggggggg")
+
 		//image upload code
 		msec := strconv.FormatInt(time.Now().UnixNano()/1000000, 10)
 		//creating a folder for uploading
@@ -52,30 +54,35 @@ func (c *UserControllers)UserInsert() bool{
 			log.Println("uploading error", err)
 			//http.Error(w,"error in uploading file",http.StatusInternalServerError)
 
-		}
-		f, err := os.OpenFile("./testUploadImage/"+msec+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
-		if err != nil {
-			fmt.Println("image 4 error", err)
+		}else{
+			f, err := os.OpenFile("./testUploadImage/"+msec+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+			if err != nil {
+				fmt.Println("image 4 error", err)
 
-		}
-		fmt.Println("jst")
-		imagePath := "./testUploadImage" + msec + header.Filename
+			}
+			fmt.Println("jst")
+			imagePath := "./testUploadImage" + msec + header.Filename
 
-		io.Copy(f, file)
-		defer file.Close()
-		user.UploadPhoto = imagePath
-		fmt.Fprintf(w, "file  uploaded")
+			io.Copy(f, file)
+			defer file.Close()
+			user.UploadPhoto = imagePath
+		}
+
+		fmt.Println("upload")
 
 		//insertion of data
+		fmt.Println("uddddd",user)
 		dbStatus := user.InserIntoUser(user)
+		fmt.Println("statusssss",dbStatus)
 		switch dbStatus {
 		case true:
-
-			return true
 			fmt.Println("insert")
+			return true
+
 		case false:
-			return false
 			fmt.Println("incorrect")
+			return false
+
 
 		}
 	}

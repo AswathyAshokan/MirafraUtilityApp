@@ -111,7 +111,10 @@ func (c *DashBoardController) DashBoardDisplay() ([][]string,[][]string,[][]stri
 	case false:
 	}
 
-
+fmt.Println("birth",BirthdayArray)
+	fmt.Println("new",BirthdayArray)
+	fmt.Println("perform",performanceArray)
+	fmt.Println("product",ProductArray)
 	return BirthdayArray,NewJoinersArray,performanceArray,ProductArray
 
 }

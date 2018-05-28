@@ -3,6 +3,7 @@ package models
 import (
 	"gopkg.in/mgo.v2"
 	"fmt"
+	"os"
 )
 
 type PerformanceModel struct {
@@ -15,38 +16,46 @@ type PerformanceModel struct {
 func (performace PerformanceModel)InsertAward()bool{
 
 	//UserData :=User{}
-	session,err:=mgo.Dial("127.0.0.1")
-
-	if err != nil {
-		panic(err)
+	uri := os.Getenv("MONGOLAB_URL")
+	if uri == "" {
+		fmt.Println("no connection string provided")
+		os.Exit(1)
 	}
 
-	defer session.Close()
-
-	session.SetMode(mgo.Monotonic, true)
-	c := session.DB("MirafraUtility").C("performance")
+	sess, err := mgo.Dial(uri)
+	if err != nil {
+		fmt.Printf("Can't connect to mongo, go error %v\n", err)
+		fmt.Println("something happend")
+		os.Exit(1)
+	}
+	defer sess.Close()
+	collection := sess.DB("mirafrautilityapp").C("performance")
 	//err = c.Find(bson.M{"EmpId": performace.EmpId}).One(&UserData)
 
 	//performace.Photo =UserData.UploadPhoto
 	// Insert
-	if err := c.Insert(performace); err != nil {
+	if err := collection.Insert(performace); err != nil {
 		return false
 	}
 	return true
 }
 func GetPerformance()(bool,[]PerformanceModel){
 	var Performance []PerformanceModel
-	session,err:=mgo.Dial("127.0.0.1")
-
-	if err != nil {
-		fmt.Println("error1",err)
-		panic(err)
+	uri := os.Getenv("MONGOLAB_URL")
+	if uri == "" {
+		fmt.Println("no connection string provided")
+		os.Exit(1)
 	}
 
-	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
-	c := session.DB("MirafraUtility").C("performance")
-	err = c.Find(nil).All(&Performance)
+	sess, err := mgo.Dial(uri)
+	if err != nil {
+		fmt.Printf("Can't connect to mongo, go error %v\n", err)
+		fmt.Println("something happend")
+		os.Exit(1)
+	}
+	defer sess.Close()
+	collection := sess.DB("mirafrautilityapp").C("performance")
+	err = collection.Find(nil).All(&Performance)
 	if err != nil {
 		fmt.Println("error2",err)
 		return  false,Performance

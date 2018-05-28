@@ -12,26 +12,31 @@ type JobController struct {
 func (c *JobController)JobPosting() bool{
 	//request :=c.Ctx.Request
 	//response :=c.Ctx.ResponseWriter
-	jobPost :=models.JobRequirement{}
-	jobPost.Designation =c.GetString("Designation")
-	jobPost.MinExperience=c.GetString("MinExperience")
-	jobPost.MaxExperience =c.GetString("MaxExperience")
-	jobPost.JobLocation =c.GetString("JobLocation")
-	jobPost.KeySkills =c.GetString("KeySkills")
-	jobPost.JobDescription =c.GetString("JobDescription")
-	jobPost.KeyResponsibility =c.GetString("KeyResponsibility")
-	dbStatus :=jobPost.InserInJobRequirement(jobPost)
-	switch dbStatus{
-	case true:
+	r := c.Ctx.Request
 
-		fmt.Println("insert")
+	if r.Method == "POST" {
+		jobPost := models.JobRequirement{}
+		jobPost.Designation = c.GetString("Designation")
+		jobPost.MinExperience = c.GetString("MinExperience")
+		jobPost.MaxExperience = c.GetString("MaxExperience")
+		jobPost.JobLocation = c.GetString("JobLocation")
+		jobPost.KeySkills = c.GetString("KeySkills")
+		jobPost.JobDescription = c.GetString("JobDescription")
+		jobPost.KeyResponsibility = c.GetString("KeyResponsibility")
+		dbStatus := jobPost.InserInJobRequirement(jobPost)
+		switch dbStatus {
+		case true:
+
+			fmt.Println("insert")
+			return true
+		case false:
+			fmt.Println("incorrect")
+			return false
+
+		}
 		return true
-	case false:
-		fmt.Println("incorrect")
-		return false
-
 	}
-return true
+	return true
 }
 func( c *JobController) DisplayJobDetails()[][]string{
 	dbStatus,jobDetails :=models.DisplayJobDetails()
@@ -53,5 +58,6 @@ func( c *JobController) DisplayJobDetails()[][]string{
 			}
 	case false:
 	}
+	fmt.Println("kkkkk",JobArray)
 	return JobArray
 }

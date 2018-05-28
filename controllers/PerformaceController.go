@@ -17,7 +17,7 @@ type PerformaneController struct {
 func(c *PerformaneController)InsertPerformanceAward()bool{
 	performance :=models.PerformanceModel{}
 	r := c.Ctx.Request
-	w := c.Ctx.ResponseWriter
+	//w := c.Ctx.ResponseWriter
 	if r.Method == "POST" {
 
 		performance.EmpId = c.GetString("EmpId")
@@ -35,20 +35,23 @@ func(c *PerformaneController)InsertPerformanceAward()bool{
 			log.Println("uploading error", err)
 			//http.Error(w,"error in uploading file",http.StatusInternalServerError)
 
-		}
-		f, err := os.OpenFile("./testUploadImage/"+msec+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
-		if err != nil {
-			fmt.Println("image 4 error", err)
+		}else{
+			f, err := os.OpenFile("./testUploadImage/"+msec+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+			if err != nil {
+				fmt.Println("image 4 error", err)
 
-		}
-		fmt.Println("jst")
-		imagePath := "./testUploadImage" + msec + header.Filename
+			}
+			fmt.Println("jst")
+			imagePath := "./testUploadImage" + msec + header.Filename
 
-		io.Copy(f, file)
-		defer file.Close()
-		performance.Photo = imagePath
-		fmt.Fprintf(w, "file  uploaded")
+			io.Copy(f, file)
+			defer file.Close()
+			performance.Photo = imagePath
+		}
+
+		fmt.Println( "file  uploaded")
 		dbStatus := performance.InsertAward()
+		fmt.Println("llll",dbStatus)
 		switch dbStatus {
 		case true:
 			return true

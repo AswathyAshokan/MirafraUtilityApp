@@ -6,7 +6,6 @@ import (
 	"time"
 	"os"
 	"log"
-	"net/http"
 	"fmt"
 	"io"
 )
@@ -14,48 +13,54 @@ import (
 type JobReferController struct {
 	BaseController
 }
-func(c *JobReferController)InsertReferDetails(){
+func(c *JobReferController)InsertReferDetails()bool{
 	jobRefer :=models.JobRefer{}
 	r := c.Ctx.Request
-	w := c.Ctx.ResponseWriter
-	jobRefer.JobId=c.GetString("JobId")
-	jobRefer.Location=c.GetString("Location")
-	jobRefer.CandidateName =c.GetString("CandidateName")
-	jobRefer.Experience = c.GetString("Experience")
-	jobRefer.JobTitle =c.GetString("JobTitle")
-	jobRefer.ReferStatus=false
-	msec := strconv.FormatInt(time.Now().UnixNano() / 1000000,10)
-	//creating a folder for uploading
-	if _, err := os.Stat("./testUploadImage/"); os.IsNotExist(err) {
+	//w := c.Ctx.ResponseWriter
 
-		os.Mkdir("./testUploadImage/",os.ModePerm)
+
+	if r.Method == "POST" {
+		jobRefer.JobId = c.GetString("JobId")
+		jobRefer.Location = c.GetString("Location")
+		jobRefer.CandidateName = c.GetString("CandidateName")
+		jobRefer.Experience = c.GetString("Experience")
+		jobRefer.JobTitle = c.GetString("JobTitle")
+		jobRefer.ReferStatus = false
+		msec := strconv.FormatInt(time.Now().UnixNano()/1000000, 10)
+		//creating a folder for uploading
+		if _, err := os.Stat("./testUploadImage/"); os.IsNotExist(err) {
+
+			os.Mkdir("./testUploadImage/", os.ModePerm)
+		}
+		file, header, err := r.FormFile("uploadfile")
+		if err != nil {
+			log.Println("uploading error", err)
+		}else{
+
+			f, err := os.OpenFile("./testUploadImage/"+msec+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+			if err != nil {
+				fmt.Println("image 4 error", err)
+				return true
+			}
+			fmt.Println("jst")
+			imagePath := "./testUploadImage" + msec + header.Filename
+
+			io.Copy(f, file)
+			defer file.Close()
+			jobRefer.Resume = imagePath
+		}
+
+		//fmt.Fprintf(w, "file  uploaded")
+		dbStatus := jobRefer.InsertJobRrfer()
+		switch  dbStatus {
+		case true:
+			return  true
+		case false:
+			return false
+
+		}
 	}
-	file,header,err :=r.FormFile("uploadfile")
-	if err !=nil{
-		log.Println("uploading error",err)
-		http.Error(w,"error in uploading file",http.StatusInternalServerError)
-		return
-	}
-	f, err := os.OpenFile("./testUploadImage/"+msec+header.Filename, os.O_WRONLY|os.O_CREATE, 0666)
-	if err != nil {
-		fmt.Println("image 4 error",err)
-		return
-	}
-	fmt.Println("jst")
-	imagePath :="./testUploadImage"+msec+header.Filename
-
-	io.Copy(f, file)
-	defer file.Close()
-	jobRefer.Resume	=imagePath
-	fmt.Fprintf(w,"file  uploaded")
-	dbStatus :=jobRefer.InsertJobRrfer()
-	switch  dbStatus {
-	case true:
-	case false:
-
-	}
-
-
+return true
 }
 func( c *JobReferController) DisplayJobReferDetails()[][]string{
 	dbStatus,jobReferDetails :=models.DisplayJobReferDetails()
@@ -75,5 +80,6 @@ func( c *JobReferController) DisplayJobReferDetails()[][]string{
 		}
 	case false:
 	}
+	fmt.Println("lllll",JobReferArray)
 	return JobReferArray
 }

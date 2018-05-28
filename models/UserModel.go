@@ -8,6 +8,7 @@ import (
 	"gopkg.in/mgo.v2/bson"
 
 	"time"
+	"os"
 )
 
 type User struct{
@@ -39,25 +40,30 @@ type User struct{
 
 }
 func (userDetails *User)InserIntoUser( user User) (bool) {
-	session,err:=mgo.Dial("127.0.0.1")
-
-	if err != nil {
-		panic(err)
+	uri := os.Getenv("MONGOLAB_URL")
+	if uri == "" {
+		fmt.Println("no connection string provided")
+		os.Exit(1)
 	}
-
-	defer session.Close()
-
-	session.SetMode(mgo.Monotonic, true)
+	fmt.Println("jjj",uri)
+	sess, err := mgo.Dial(uri)
+	if err != nil {
+		fmt.Printf("Can't connect to mongo, go error %v\n", err)
+		fmt.Println("something happend")
+		os.Exit(1)
+	}
+	defer sess.Close()
 	hashedPassword, err := bcrypt.GenerateFromPassword(userDetails.Password, bcrypt.DefaultCost)
 	if err != nil {
 		log.Println(err)
 		return false
 	}
 	userDetails.Password = hashedPassword
-	c := session.DB("MirafraUtility").C("user")
+	collection := sess.DB("mirafrautilityapp").C("user")
 
+	fmt.Println("lllllllllllll",collection)
 	// Insert
-	if err := c.Insert(userDetails); err != nil {
+	if err := collection.Insert(userDetails); err != nil {
 		return false
 	}
 	return true
@@ -68,17 +74,21 @@ func GetBirthdayUsers () (bool,[]User){
 
 
 	var BirthDay []User
-	session,err:=mgo.Dial("127.0.0.1")
-
-	if err != nil {
-		fmt.Println("error1",err)
-		panic(err)
+	uri := os.Getenv("MONGOLAB_URL")
+	if uri == "" {
+		fmt.Println("no connection string provided")
+		os.Exit(1)
 	}
 
-	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
-	c := session.DB("MirafraUtility").C("user")
-	err = c.Find(nil).All(&BirthDay)
+	sess, err := mgo.Dial(uri)
+	if err != nil {
+		fmt.Printf("Can't connect to mongo, go error %v\n", err)
+		fmt.Println("something happend")
+		os.Exit(1)
+	}
+	defer sess.Close()
+	collection := sess.DB("mirafrautilityapp").C("user")
+	err = collection.Find(nil).All(&BirthDay)
 	if err != nil {
 		fmt.Println("error2",err)
 		return  false,BirthDay
@@ -94,17 +104,21 @@ func GetNewJoiners() (bool,[]User){
 	currentTime := time.Now()
 	todayDate :=currentTime.Format("02/01/2006")
 	var NewJoiners []User
-	session,err:=mgo.Dial("127.0.0.1")
-
-	if err != nil {
-		fmt.Println("error1",err)
-		panic(err)
+	uri := os.Getenv("MONGOLAB_URL")
+	if uri == "" {
+		fmt.Println("no connection string provided")
+		os.Exit(1)
 	}
 
-	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
-	c := session.DB("MirafraUtility").C("user")
-	err = c.Find(bson.M{"DateOfJoin": todayDate}).All(&NewJoiners)
+	sess, err := mgo.Dial(uri)
+	if err != nil {
+		fmt.Printf("Can't connect to mongo, go error %v\n", err)
+		fmt.Println("something happend")
+		os.Exit(1)
+	}
+	defer sess.Close()
+	collection := sess.DB("mirafrautilityapp").C("user")
+	err = collection.Find(bson.M{"DateOfJoin": todayDate}).All(&NewJoiners)
 	if err != nil {
 		fmt.Println("error2",err)
 		return  false,NewJoiners

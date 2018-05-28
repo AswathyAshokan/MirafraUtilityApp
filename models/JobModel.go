@@ -3,8 +3,9 @@ package models
 import (
 	"gopkg.in/mgo.v2"
 	"fmt"
-	"gopkg.in/mgo.v2/bson"
-	"strconv"
+	"os"
+	"math/rand"
+	"time"
 )
 
 type JobRequirement struct{
@@ -33,40 +34,38 @@ type JobCounter struct {
 
 func (jobDetails *JobRequirement)InserInJobRequirement( job JobRequirement) (bool) {
 
-	session,err:=mgo.Dial("127.0.0.1")
+	uri := os.Getenv("MONGOLAB_URL")
+	if uri == "" {
+		fmt.Println("no connection string provided")
+		os.Exit(1)
+	}
 
+	sess, err := mgo.Dial(uri)
 	if err != nil {
-		panic(err)
+		fmt.Printf("Can't connect to mongo, go error %v\n", err)
+		fmt.Println("something happend")
+		os.Exit(1)
+	}
+	defer sess.Close()
+
+	sess.SetSafe(&mgo.Safe{})
+	var r *rand.Rand
+
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	const chars = "012345abcdefghijklmnopqrstuvwxyz6789"
+	result := make([]byte, 8)
+	for i := range result {
+		result[i] = chars[r.Intn(len(chars))]
 	}
 
-	defer session.Close()
+	fmt.Println("gfghggghg", string(result))
+	collection := sess.DB("mirafrautilityapp").C("jobRequirements")
+	if collection !=nil{
 
-	session.SetMode(mgo.Monotonic, true)
-	jobCounter :=JobCounter{}
-	jobCounter.JobId ="JobId"
-	jobCounter.seq= 0
-	db :=session.DB("MirafraUtility").C("jobCounter")
-	if db !=nil{
-
-		fmt.Println("error",db)
+		fmt.Println("error",collection)
 	}
-	err = db.Insert(jobCounter)
-	if err !=nil {
-		fmt.Println("error login ",err)
-	}
-
-	//updating the sequence
-	err =db.Find(nil).All(jobCounter)
-	counter :=jobCounter.seq+1
-	err = db.Update(bson.M{"JobId":jobCounter.JobId }, bson.M{"$set": bson.M{"seq": counter}})
-
-	db =session.DB("MirafraUtility").C("jobRequirements")
-	if db !=nil{
-
-		fmt.Println("error",db)
-	}
-	job.JobId="job00"+ strconv.FormatInt(counter, 10)
-	err = db.Insert(job)
+	job.JobId="Job"+ string(result)
+	err = collection.Insert(job)
 	if err !=nil {
 		fmt.Println("error login ",err)
 	}
@@ -75,17 +74,21 @@ return true
 }
 func DisplayJobDetails()(bool,[]JobRequirement){
 	var Job []JobRequirement
-	session,err:=mgo.Dial("127.0.0.1")
-
-	if err != nil {
-		fmt.Println("error1",err)
-		panic(err)
+	uri := os.Getenv("MONGOLAB_URL")
+	if uri == "" {
+		fmt.Println("no connection string provided")
+		os.Exit(1)
 	}
 
-	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
-	c := session.DB("MirafraUtility").C("jobRequirements")
-	err = c.Find(nil).All(&Job)
+	sess, err := mgo.Dial(uri)
+	if err != nil {
+		fmt.Printf("Can't connect to mongo, go error %v\n", err)
+		fmt.Println("something happend")
+		os.Exit(1)
+	}
+	defer sess.Close()
+	collection := sess.DB("mirafrautilityapp").C("jobRequirements")
+	err = collection.Find(nil).All(&Job)
 	if err != nil {
 		fmt.Println("error2",err)
 		return  false,Job

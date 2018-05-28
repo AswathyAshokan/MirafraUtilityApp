@@ -89,7 +89,7 @@ func DisplayEventDetails()(bool,[] EventModel){
 	collection := sess.DB("mirafrautilityapp").C("event")
 
 
-	err = collection.Find(bson.M{"eventstatus":true}).All(&Event)
+	err = collection.Find(bson.M{"eventstatus":false}).All(&Event)
 	if err != nil {
 		fmt.Println("error2",err)
 		return  false,Event

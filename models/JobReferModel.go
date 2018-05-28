@@ -4,6 +4,7 @@ import (
 	"gopkg.in/mgo.v2"
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
+	"os"
 )
 
 type JobRefer struct {
@@ -20,36 +21,44 @@ type JobRefer struct {
 }
 
 func(jobRefer JobRefer)InsertJobRrfer()bool{
-
-	session,err:=mgo.Dial("127.0.0.1")
-
-	if err != nil {
-		panic(err)
+ fmt.Println("ggggfffffffff")
+	uri := os.Getenv("MONGOLAB_URL")
+	if uri == "" {
+		fmt.Println("no connection string provided")
+		os.Exit(1)
 	}
 
-	defer session.Close()
+	sess, err := mgo.Dial(uri)
+	if err != nil {
+		fmt.Printf("Can't connect to mongo, go error %v\n", err)
+		fmt.Println("something happend")
+		os.Exit(1)
+	}
+	defer sess.Close()
+	collection := sess.DB("mirafrautilityapp").C("jobRefer")
 
-	session.SetMode(mgo.Monotonic, true)
-	c := session.DB("MirafraUtility").C("jobRefer")
-
-	if err := c.Insert(jobRefer); err != nil {
+	if err := collection.Insert(jobRefer); err != nil {
 		return false
 	}
 	return true
 }
 func DisplayJobReferDetails()(bool,[]JobRefer){
 	var JobRefer []JobRefer
-	session,err:=mgo.Dial("127.0.0.1")
-
-	if err != nil {
-		fmt.Println("error1",err)
-		panic(err)
+	uri := os.Getenv("MONGOLAB_URL")
+	if uri == "" {
+		fmt.Println("no connection string provided")
+		os.Exit(1)
 	}
 
-	defer session.Close()
-	session.SetMode(mgo.Monotonic, true)
-	c := session.DB("MirafraUtility").C("jobRefer")
-	err = c.Find(bson.M{"ReferStatus": false}).All(&JobRefer)
+	sess, err := mgo.Dial(uri)
+	if err != nil {
+		fmt.Printf("Can't connect to mongo, go error %v\n", err)
+		fmt.Println("something happend")
+		os.Exit(1)
+	}
+	defer sess.Close()
+	collection := sess.DB("mirafrautilityapp").C("jobRefer")
+	err = collection.Find(bson.M{"referstatus":false}).All(&JobRefer)
 	if err != nil {
 		fmt.Println("error2",err)
 		return  false,JobRefer
