@@ -47,7 +47,7 @@ func (event EventModel)InsertEvent()bool{
 		os.Exit(1)
 	}
 	defer sess.Close()
-
+	fmt.Println("kkkkkk")
 	sess.SetSafe(&mgo.Safe{})
 	var r *rand.Rand
 
