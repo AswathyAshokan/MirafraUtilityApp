@@ -4,9 +4,10 @@ import (
 	"gopkg.in/mgo.v2"
 	"fmt"
 	"gopkg.in/mgo.v2/bson"
-	"strconv"
 	"os"
 	"log"
+	"math/rand"
+	"time"
 )
 
 type EventModel struct {
@@ -48,47 +49,17 @@ func (event EventModel)InsertEvent()bool{
 	defer sess.Close()
 
 	sess.SetSafe(&mgo.Safe{})
-	eventCounter :=EventCounter{}
-	eventFind  :=EventCounter{}
+	var r *rand.Rand
 
-
-	collection := sess.DB("mirafrautilityapp").C("eventCounter")
-	err =collection.Find(nil).One(eventFind)
-	fmt.Println("hhhhhh",eventFind.EventId)
-
-	if len(eventFind.EventId) ==0{
-		eventCounter.Count="0"
-		eventCounter.EventId ="EventId"
-		fmt.Println("event",eventCounter)
-		err = collection.Insert(eventCounter)
-		if err != nil {
-			log.Fatal("Problem inserting data: ", err)
-			return false
-		}
+	r = rand.New(rand.NewSource(time.Now().UnixNano()))
+	const chars = "012345abcdefghijklmnopqrstuvwxyz6789"
+	result := make([]byte, 8)
+	for i := range result {
+		result[i] = chars[r.Intn(len(chars))]
 	}
 
-	fmt.Println("condition1")
-	fmt.Println("condition2")
-	fmt.Println("condition3")
-
-
-
-	//updating the sequence
-	err =collection.Find(nil).One(eventCounter)
-	i, err := strconv.Atoi(eventCounter.Count)
-	counter :=i+1
-
-	selector := bson.M{"eventId": "EventId"}
-	updator := bson.M{"$set": bson.M{"count": counter}}
-	if err := collection.Update(selector, updator); err != nil {
-		fmt.Println("hhhhhgddgfdfdf",err)
-	}
-
-
-
-
-
-	event.EventId="event00"+ strconv.Itoa(counter)
+	fmt.Println("gfghggghg", string(result))
+	event.EventId="Ev"+ string(result)
 	con := sess.DB("mirafrautilityapp").C("event")
 	err = con.Insert(event)
 	if err != nil {
@@ -118,7 +89,7 @@ func DisplayEventDetails()(bool,[] EventModel){
 	collection := sess.DB("mirafrautilityapp").C("event")
 
 
-	err = collection.Find(bson.M{"eventstatus": true}).All(&Event)
+	err = collection.Find(bson.M{"eventstatus":true}).All(&Event)
 	if err != nil {
 		fmt.Println("error2",err)
 		return  false,Event
@@ -131,7 +102,7 @@ func DisplayEventDetails()(bool,[] EventModel){
 
 func (event EventModel)EventUpdate()bool{
 
-	uri := os.Getenv("mongodb://aswathyashok:aswathy@ds133550.mlab.com:33550/mirafrautilityapp")
+	uri := os.Getenv("MONGOLAB_URL")
 	if uri == "" {
 		fmt.Println("no connection string provided")
 		os.Exit(1)
