@@ -99,6 +99,8 @@ func DisplayProductDetails()(bool,[]Product){
 
 	}
 	fmt.Println("product details struct",Product)
+	fmt.Println("product details struct",Product)
+
 	return true,Product
 
 }
