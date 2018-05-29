@@ -1,1 +1,2 @@
-web: MirafraUtilityApp
+
+web: MirafraUtilityApp -port=$PORT
